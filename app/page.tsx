@@ -27,7 +27,7 @@ export default function Home() {
           {/* Header Section */}
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-              Welcome to Quizzo!
+              Welcome to Quizo!
             </h1>
             <ModeToggle />
           </div>
