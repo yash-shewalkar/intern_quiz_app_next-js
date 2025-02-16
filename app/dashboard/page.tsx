@@ -3,6 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, TrashIcon, PencilIcon } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
 
 interface Quiz {
   id: string;
@@ -18,7 +30,9 @@ export default function DashboardPage() {
   const teacherId = getCookie("teacherId");
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (!teacherId) return;
@@ -40,59 +54,93 @@ export default function DashboardPage() {
     fetchQuizzes();
   }, [teacherId]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this quiz?")) return;
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 850);
+    };
 
+    handleResize(); // Check on initial render
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleDelete = async (quizId: string) => {
     try {
-      const res = await fetch(`/api/quizzes/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/quizzes/${quizId}`, { method: "DELETE" });
       const data = await res.json();
 
       if (data.success) {
-        setQuizzes((prev) => prev.filter((quiz) => quiz.id !== id));
+        setQuizzes((prev) => prev.filter((quiz) => quiz.id !== quizId));
+        toast({ title: "Quiz Deleted", description: "The quiz has been removed successfully." });
+      } else {
+        toast({ title: "Error", description: data.error, variant: "destructive" });
       }
     } catch (error) {
       console.error("Error deleting quiz:", error);
+      toast({ title: "Error", description: "Failed to delete quiz.", variant: "destructive" });
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 p-4 text-black">
-      <h2 className="text-2xl font-bold text-white">Quiz Management</h2>
-      <p className="text-slate-200 mb-4">Manage and monitor all your quizzes from one place</p>
-      <p className="text-slate-200 mb-4">{teacherId}</p>
+    <div className="flex min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-950">
+      {/* Sidebar */}
+      <Sidebar />
 
-      {loading ? (
-        <p>Loading quizzes...</p>
-      ) : quizzes.length === 0 ? (
-        <p>No quizzes available.</p>
-      ) : (
-        <div className="space-y-4">
-          {quizzes.map((quiz) => (
-            <div key={quiz.id} className="p-4 border rounded-lg shadow-sm bg-white relative">
-              <h3 className="text-lg font-semibold">{quiz.title}</h3>
-              <p className="text-gray-600">{quiz.description}</p>
+      {/* Main content */}
+      <main className={`flex-1 flex flex-col items-center justify-center p-6 ${isMobile ? "mx-auto" : "ml-64"}`}>
+        <h2 className="text-3xl font-bold text-center">Quiz Management</h2>
+        <p className="text-gray-700 dark:text-gray-400 mb-6 text-center">Manage and monitor all your quizzes from one place</p>
 
-              <div className="grid grid-cols-2 mt-2 text-gray-500 text-sm">
-                <p>📅 Created: {new Date(quiz.createdAt).toLocaleDateString()}</p>
-                <p>📅 Scheduled: {quiz.scheduledAt ? new Date(quiz.scheduledAt).toLocaleString() : "Not Set"}</p>
+        {loading ? (
+          <div className="flex justify-center">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        ) : quizzes.length === 0 ? (
+          <p className="text-gray-500 text-center">No quizzes available.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full px-4">
+            {quizzes.map((quiz) => (
+              <Card key={quiz.id} className="shadow-md transition-transform hover:scale-105 hover:shadow-lg p-4 dark:bg-gray-800 dark:text-white">
+                <CardHeader>
+                  <h3 className="text-lg font-semibold">{quiz.title}</h3>
+                  <p className="text-gray-600 text-sm dark:text-white">{quiz.description}</p>
+                </CardHeader>
+                <CardContent className="text-sm text-gray-4 00">
+                  <p>📅 Created: {new Date(quiz.createdAt).toLocaleDateString()}</p>
+                  <p>📅 Scheduled: {quiz.scheduledAt ? new Date(quiz.scheduledAt).toLocaleString() : "Not Set"}</p>
+                  <p>❓ Questions: {quiz.questions}</p>
+                  <p>🏆 Max Marks: {quiz.maxScore}</p>
+                </CardContent>
 
-                <p>❓ Questions: {quiz.questions}</p>
-                <p>🏆 Max Marks: {quiz.maxScore}</p>
-              </div>
+                {/* Buttons: Ensure proper layout with flex-wrap */}
+                <CardFooter className="flex flex-wrap justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex items-center"
+                    onClick={() => router.push(`/dashboard/edit/${quiz.id}`)}
+                  >
+                    <PencilIcon className="w-4 h-4 mr-1" /> Edit
+                  </Button>
 
-              {/* Edit & Delete Icons */}
-              <div className="absolute top-3 right-3 space-x-2">
-                <button onClick={() => router.push(`/dashboard/edit/${quiz.id}`)} className="text-blue-600 hover:text-blue-800">
-                  ✏️
-                </button>
-                <button onClick={() => handleDelete(quiz.id)} className="text-red-600 hover:text-red-800">
-                  🗑️
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="flex items-center">
+                        <TrashIcon className="w-4 h-4 mr-1" /> Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>Are you sure you want to delete this quiz?</AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <Button onClick={() => handleDelete(quiz.id)}>Yes, Delete</Button>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

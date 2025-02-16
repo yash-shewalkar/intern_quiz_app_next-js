@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import { getCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+
 export default function CreateQuizPage() {
   const [formData, setFormData] = useState({
     title: "",
@@ -10,13 +19,12 @@ export default function CreateQuizPage() {
     questions: "",
     maxScore: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  // hardcoded teacher ID for now
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
   const teacherId = getCookie("teacherId");
-  // const teacherId = "85269a52-2605-425e-8faf-026abb644d71";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,17 +33,14 @@ export default function CreateQuizPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/quizzes", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          teacherId, // Send teacher ID with the request
+          teacherId,
           questions: Number(formData.questions),
           maxScore: Number(formData.maxScore),
         }),
@@ -43,85 +48,104 @@ export default function CreateQuizPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage("Quiz created successfully!");
-        setSuccess(true);
+        toast({ title: "Quiz Created", description: "The quiz has been successfully created!" });
         setFormData({ title: "", description: "", scheduledAt: "", questions: "", maxScore: "" });
+        router.push("/dashboard");
       } else {
-        setMessage(data.error || "Failed to create quiz");
-        setSuccess(false);
+        toast({ title: "Error", description: data.error || "Failed to create quiz", variant: "destructive" });
       }
     } catch (error) {
-      setMessage(error + " Something went wrong. Please try again.");
-      setSuccess(false);
+      console.error("Error:", error);
+      toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-md shadow-md text-black">
-      <h2 className="text-2xl font-bold mb-4">Create a Quiz</h2>
+    <div className="flex min-h-screen bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-900 dark:to-gray-950">
+      {/* Sidebar */}
+      <Sidebar />
 
-      {message && success && <p className="text-center text-green-500">{message}</p>}
-      {message && !success && <p className="text-center text-red-500">{message}</p>}
+      <main className="mx-auto flex-1 flex flex-col items-center justify-center p-10 md:ml-64">
+        <Card className="w-full max-w-3xl bg-white dark:bg-gray-800 shadow-md rounded-lg">
+          <CardHeader>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create a Quiz</h2>
+            <p className="text-gray-600 dark:text-gray-400">Fill in the details to create a new quiz</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300">Quiz Title</label>
+                <Input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="Enter quiz title"
+                  required
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+              </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="Quiz Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md"
-        />
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300">Description</label>
+                <Textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Enter quiz description"
+                  required
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+              </div>
 
-        <textarea
-          name="description"
-          placeholder="Quiz Description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md"
-        />
+              <div>
+                <label className="block text-sm font-medium dark:text-gray-300">Schedule Date & Time</label>
+                <Input
+                  type="datetime-local"
+                  name="scheduledAt"
+                  value={formData.scheduledAt}
+                  onChange={handleChange}
+                  required
+                  className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                />
+              </div>
 
-        <input
-          type="datetime-local"
-          name="scheduledAt"
-          value={formData.scheduledAt}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md"
-        />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium dark:text-gray-300">Number of Questions</label>
+                  <Input
+                    type="number"
+                    name="questions"
+                    value={formData.questions}
+                    onChange={handleChange}
+                    required
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                </div>
 
-        <input
-          type="number"
-          name="questions"
-          placeholder="Number of Questions"
-          value={formData.questions}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md"
-        />
-
-        <input
-          type="number"
-          name="maxScore"
-          placeholder="Max Score"
-          value={formData.maxScore}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
-        >
-          {loading ? "Creating..." : "Create Quiz"}
-        </button>
-      </form>
+                <div>
+                  <label className="block text-sm font-medium dark:text-gray-300">Max Score</label>
+                  <Input
+                    type="number"
+                    name="maxScore"
+                    value={formData.maxScore}
+                    onChange={handleChange}
+                    required
+                    className="dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                  />
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-end">
+            <Button type="submit" onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Quiz"}
+            </Button>
+          </CardFooter>
+        </Card>
+      </main>
     </div>
   );
 }
