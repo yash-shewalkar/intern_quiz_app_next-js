@@ -12,14 +12,24 @@ const Sidebar = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/login"); // Redirect to login after logout
-    }, 1500);
+  
+    try {
+      const response = await fetch("/api/logout", { method: "POST" });
+  
+      if (response.ok) {
+        setTimeout(() => {
+          setLoading(false);
+          router.push("/login"); // Redirect after logout
+        }, 1000);
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
-
   return (
     <>
       {/* Mobile Toggle Button */}

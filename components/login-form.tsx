@@ -36,7 +36,7 @@ export function LoginForm({
     setCookie("teacherId", data.userId, { maxAge: 60 * 60 * 24 * 7, path: "/" }); // allows cookies to all routes
 
     if (response.ok) {
-      router.push("/dashboard/");
+      router.push("/");
     } else {
       setError(data.error || "Login failed");
     }
