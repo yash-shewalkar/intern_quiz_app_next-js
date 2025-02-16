@@ -1,6 +1,30 @@
 # Quiz App in Next.js
 
 # 📌 Developed with Next.js, Prisma, and PostgreSQL
+# 📌 Features
+
+## ✅ Authentication
+Simple login system (static credentials, no JWT required).
+Teachers can log in using pre-defined credentials.
+### sign in with 
+`uname : admin  password: admin123`
+
+## ✅ Quiz Management (CRUD)
+Create Quizzes: Teachers can create quizzes with a title and description.
+View Quizzes: List of all quizzes created by the logged-in teacher.
+Update Quizzes: Edit existing quizzes.
+Delete Quizzes: Remove quizzes from the database.
+
+## ✅ Responsive UI
+Built with ShadCN UI components for a clean, modern interface.
+Mobile-friendly, responsive design using Flexbox/Grid layout.
+
+## ✅ Database Integration
+PostgreSQL used to store user and quiz data.
+Prisma ORM for database interactions.
+
+## ✅ RESTful API
+API handles user authentication and quiz CRUD operations.
 
 ## Getting Started
 
