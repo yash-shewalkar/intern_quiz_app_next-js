@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 //  GET QUIZ BY ID
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
-  const { params } = context; // Await the params correctly
-  const id = params.id; 
+export async function GET(req: NextRequest, { params }: { params: Promise< { id: string } >}) {
+  const id =(await params).id;
   try {
     const quiz = await prisma.quiz.findUnique({
       where: { id: id },
-      select: { id: true, title: true, description: true, createdAt: true, scheduledAt: true, questions: true, maxScore: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true,
+        scheduledAt: true,
+        questions: true,
+        maxScore: true,
+      },
     });
 
     if (!quiz) {
@@ -18,15 +25,13 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
     return NextResponse.json({ success: true, quiz });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error +" Database error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error) + " Database error" }, { status: 500 });
   }
 }
 
 //  UPDATE QUIZ BY ID
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-  const { params } = context;
-  const id = params.id;
-
+export async function PUT(req: NextRequest, { params }: { params:  Promise< { id: string } >}){
+  const id =(await params).id;
   try {
     const body = await req.json(); // Get all update fields dynamically
 
@@ -36,7 +41,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     }
 
     const updatedQuiz = await prisma.quiz.update({
-      where: { id },
+      where: { id:id },
       data: body, // Pass the entire request body to update multiple fields dynamically
     });
 
@@ -47,21 +52,19 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error + " Quiz not found or database error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error) + " Quiz not found or database error" }, { status: 500 });
   }
 }
 
-
 // DELETE QUIZ BY ID
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-  const { params } = context; // Await the params correctly
-  const id = params.id; 
+export async function DELETE(req: NextRequest, { params }: { params: Promise< { id: string } >}) {
+  const id =(await params).id;
   try {
     await prisma.quiz.delete({ where: { id: id } });
 
     return NextResponse.json({ success: true, message: "Quiz deleted successfully" });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error:error +  " Quiz not found or database error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error) + " Quiz not found or database error" }, { status: 500 });
   }
 }

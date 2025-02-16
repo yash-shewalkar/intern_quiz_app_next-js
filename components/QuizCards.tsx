@@ -29,7 +29,7 @@ export default function QuizCards({ quizzes }: QuizCardsProps) {
             </CardHeader>
             <CardContent>
               <p><strong>Date:</strong> {quiz.scheduledAt}</p>
-              <Badge variant={quiz.status === "active" ? "success" : "secondary"}>
+              <Badge variant={quiz.status === "active" ? "default" : "secondary"}>
                 {quiz.status}
               </Badge>
             </CardContent>

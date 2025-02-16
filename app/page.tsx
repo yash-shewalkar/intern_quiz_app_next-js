@@ -33,7 +33,7 @@ export default function Home() {
           </div>
 
           <p className="text-lg text-gray-700 dark:text-gray-300 mb-10">
-            Create, manage, and take quizzes with ease. Whether you're a teacher, student, or just love quizzes, this platform has everything you need.
+            Create, manage, and take quizzes with ease. Whether you are a teacher, student, or just love quizzes, this platform has everything you need.
           </p>
 
           <Separator className="mb-10" />

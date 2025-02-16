@@ -44,8 +44,8 @@ export default function SignUpPage() {
       const data = await response.json();
       setCookie("teacherId", data.userId, { maxAge: 60 * 60 * 24 * 7, path: "/" }); // allows cookies to all routes
       if (response.ok) {
-        setSuccess("Sign-up successful! Redirecting to homepage...");
-        setTimeout(() => router.push("/"), 2000);
+        setSuccess("Sign-up successful! Redirecting to login page...");
+        setTimeout(() => router.push("/login"), 2000);
       } else {
         setError(data.error || "Sign-up failed");
       }
