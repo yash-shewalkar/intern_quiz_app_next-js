@@ -25,6 +25,18 @@ Prisma ORM for database interactions.
 
 ## ✅ RESTful API
 API handles user authentication and quiz CRUD operations.
+# UI DEMO 
+
+
+
+
+
+https://github.com/user-attachments/assets/f619bc9b-d4f2-4056-8e96-1cd9fc9a2672
+
+
+
+
+
 
 ## Getting Started
 
