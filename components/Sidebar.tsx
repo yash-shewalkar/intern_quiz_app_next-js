@@ -47,7 +47,7 @@ const Sidebar = () => {
         {/* Sidebar for Mobile (ShadCN Sheet) */}
         <SheetContent side="left" className="p-0 w-64 bg-gray-900 text-white">
           <div className="p-6 text-xl font-bold tracking-wider text-yellow-400">
-            Quizzo
+            Quizo
           </div>
           <nav className="flex-1">
             <ul className="space-y-2 p-4">
@@ -88,7 +88,7 @@ const Sidebar = () => {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex-col shadow-md">
         <div className="p-6 text-xl font-bold tracking-wider text-yellow-400">
-          Quizzo
+          Quizo
         </div>
 
         <nav className="flex-1">
